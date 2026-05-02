@@ -66,6 +66,26 @@ query {
 }
 ```
 
+## ⚡ Quick Use (Inference Demo)
+
+If you have already initialized the environments, run the full pipeline with these two commands:
+
+**Step 1: Quantize & Validate Model**
+```bash
+# From root
+cd core_quantizer && python -m src.quantizer && python -m pytest
+```
+**Step 2: Query FHIR API**
+```bash
+# Start server in one terminal
+cd api_gateway && php artisan serve
+
+# Run this curl in another to get the FHIR DiagnosticReport
+curl -X POST http://localhost:8000/graphql \
+     -H "Content-Type: application/json" \
+     -d '{"query": "query { diagnosticReport(patientId: \"SW-1985\") { aiInferenceScore edgeModelVersion } }"}'
+```
+
 ## Implementation Rationale
 *   **Resource Efficiency:** Implements INT8 quantization to bridge the gap between heavy GNN research and edge-native execution.
 *   **Interoperability:** Maps raw AI scores to **FHIR** `DiagnosticReport` resources for seamless clinical integration.
@@ -77,4 +97,4 @@ query {
 *   **`CITATION.cff`**: Academic and professional attribution.
 *   **`CONTRIBUTING.md`**: Architectural and coding standards for open-source contributors.
 
----
+

@@ -1,0 +1,45 @@
+name: CI Suite - Edge Quantizer
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-python-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: |
+          cd core_quantizer
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run Test Suite
+        run: |
+          cd core_quantizer
+          python -m pytest
+
+  test-laravel-gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo, sqlite, gd
+      - name: Install Composer Dependencies
+        run: |
+          cd api_gateway
+          composer install --no-dev --no-scripts --prefer-dist
+      - name: Initialize Database
+        run: |
+          cd api_gateway
+          touch database/database.sqlite
+          php artisan migrate --force
