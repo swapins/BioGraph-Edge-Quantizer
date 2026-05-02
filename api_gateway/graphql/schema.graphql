@@ -1,0 +1,22 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+type Query {
+    "Simulates querying an Edge AI-driven Diagnostic Report using FHIR standards"
+    diagnosticReport(patientId: ID!): DiagnosticReport @field(resolver: "App\\GraphQL\\Queries\\DiagnosticReportQuery@resolve")
+}
+
+"Mock FHIR Resource mapping for AI Edge Inference results"
+type DiagnosticReport {
+    id: ID!
+    status: String!
+    category: String!
+    subject: Patient!
+    aiInferenceScore: Float!
+    edgeModelVersion: String!
+}
+
+type Patient {
+    id: ID!
+    reference: String!
+}

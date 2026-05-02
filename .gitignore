@@ -1,0 +1,25 @@
+# Python / core_quantizer
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.pytest_cache/
+core_quantizer/models/*.pt
+!core_quantizer/models/.gitkeep
+
+# Laravel / api_gateway
+api_gateway/vendor/
+api_gateway/node_modules/
+api_gateway/public/storage
+api_gateway/public/hot
+api_gateway/storage/*.key
+api_gateway/.env
+api_gateway/.phpunit.result.cache
+api_gateway/database/*.sqlite
+api_gateway/database/*.sqlite-journal
+
+# General
+.DS_Store
+.idea/
+.vscode/
+*.swp

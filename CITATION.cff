@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Vidya
+    given-names: Swapin
+    orcid: "https://orcid.org/0009-0009-5758-3845"
+title: "BioGraph-Edge-Quantizer: Resource-Aware GNN Quantization for Clinical Edge Intelligence"
+version: 1.0.0
+date-released: 2026-05-02
+url: "https://github.com/[your-username]/BioGraph-Edge-Quantizer"
+keywords:
+  - "Graph Neural Networks"
+  - "Model Quantization"
+  - "Edge Computing"
+  - "FHIR"
+  - "Bioinformatics"
