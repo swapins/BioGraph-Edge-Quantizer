@@ -23,3 +23,13 @@ api_gateway/database/*.sqlite-journal
 .idea/
 .vscode/
 *.swp
+
+# ML Artifacts
+core_quantizer/models/*.pt
+core_quantizer/models/*.ptz
+core_quantizer/models/*.zip
+core_quantizer/models/temp_*
+
+# Research Data
+core_quantizer/data/*.txt
+core_quantizer/data/*.csv
