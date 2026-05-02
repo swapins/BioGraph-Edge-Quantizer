@@ -91,10 +91,27 @@ curl -X POST http://localhost:8000/graphql \
 *   **Interoperability:** Maps raw AI scores to **FHIR** `DiagnosticReport` resources for seamless clinical integration.
 *   **IP Alignment:** Developed in coordination with modular on-device clinical intelligence research (Patent No. 202541127477).
 
----
 
-### Documentation
+## Documentation
 *   **`CITATION.cff`**: Academic and professional attribution.
 *   **`CONTRIBUTING.md`**: Architectural and coding standards for open-source contributors.
+
+Here is the glossary in Markdown table format for your `README.md`. It balances high-level concepts with technical specifics, reflecting your role as a **Senior Systems Architect** and **Technical Mentor**.
+
+## Technical Glossary & Abbreviations
+
+| Term | Expansion | Description |
+| :--- | :--- | :--- |
+| **GNN** | **Graph Neural Network** | A specialized AI architecture designed to process data structured as graphs, such as biological protein-protein interaction networks. |
+| **FHIR** | **Fast Healthcare Interoperability Resources** | The industry-standard protocol (HL7) for exchanging electronic health records, ensuring clinical data interoperability. |
+| **INT8** | **8-bit Integer** | A low-precision data format used in **Quantization** to significantly reduce model size and accelerate execution on constrained hardware. |
+| **Edge AI** | **Edge Artificial Intelligence** | AI models executed locally on physical devices to ensure **data sovereignty** and eliminate cloud latency. |
+| **PPI** | **Protein-Protein Interaction** | High-specificity physical contact between protein molecules, modeled here using GNNs for biological network analysis. |
+| **SBC** | **Single-Board Computer** | Compact, resource-constrained hardware like the **NVIDIA Jetson** or **Raspberry Pi** used for localized inference tasks. |
+| **REST / GraphQL** | **Representational State Transfer / Graph Query Language** | Communication protocols for the **API Gateway**; GraphQL enables precise data retrieval to optimize bandwidth. |
+| **PSR-4** | **PHP Standard Recommendation 4** | A technical specification for PHP autoloading that maps namespaces to file paths, ensuring architectural integrity. |
+
+---
+
 
 
