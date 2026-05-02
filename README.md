@@ -1,99 +1,211 @@
 # BioGraph-Edge-Quantizer
 
-**Lead Architect:** Swapin Vidya  
-**ORCID:** [0009-0009-5758-3845](https://orcid.org/0009-0009-5758-3845)  
-**Email:** swapin@peachbot.in  
-**Professional Context:** Senior Systems Architect and Backend Developer. Research developed during an academic sabbatical to align with on-device clinical intelligence goals.
+**Lead Architect:** Swapin Vidya <br>
+**ORCID:** [0009-0009-5758-3845](https://orcid.org/0009-0009-5758-3845)<br>
+**Email:** [swapin@peachbot.in](mailto:swapin@peachbot.in)
 
 ![Version](https://img.shields.io/badge/Version-v1.0--INT8--Quantized-blue)
-![Patent](https://img.shields.io/badge/Patent-No._202541127477-green)
 ![Dataset](https://img.shields.io/badge/Dataset-STRING_v12.0-orange)
 ![Architecture](https://img.shields.io/badge/Architecture-GraphSAGE-red)
 ![Optimization](https://img.shields.io/badge/Compression-74.99%25-brightgreen)
-![Implementation](https://img.shields.io/badge/Interoperability-FHIR--Compliant-blueviolet)
 
-A deterministic framework for optimizing **Graph Neural Networks (GNNs)** for biological network analysis on edge hardware. This implementation utilizes a **Data Structuring & Preprocessing Layer** to ingest real-world **STRING** dataset protein interactions.
+---
+## Overview
+
+BioGraph-Edge-Quantizer is a **resource-aware Graph Neural Network pipeline** designed for:
+
+* edge-constrained inference
+* large-scale biological graphs
+* reproducible performance evaluation
+
+The system focuses on:
+
+* **bounded-variance inference latency**
+* **reduced model footprint via INT8 weight packing**
+* **deployable execution using TorchScript**
+
+---
+
+## Problem Definition
+
+This project models protein–protein interaction graphs derived from the
+STRING database.
+
+**Task (Current Prototype):**
+
+* Node-level inference (binary classification placeholder)
+
+**Input Characteristics:**
+
+* Node features: 4096-dimensional embeddings
+* Graph size: ~10,000 nodes / ~50,000 edges
+
+**Objective:**
+Enable **practical inference under CPU-only, edge-constrained environments**.
 
 ---
 
 ## System Architecture
-*   **`core_quantizer/`**: Python environment for GNN optimization using **Edge-GNN** principles, featuring a **GraphSAGE** architecture optimized for ARMv8-A.
-*   **`api_gateway/`**: PHP/Laravel 12 implementation serving inference results via a **FHIR-compliant** GraphQL interface.
+
+* **`core_quantizer/`**
+  Python-based GNN pipeline using GraphSAGE and PyTorch Geometric
+
+* **`api_gateway/`**
+  Laravel-based interface exposing inference through a structured API
 
 ---
 
-## Setup & Initialization
+## ⚙️ Setup & Initialization
 
 ### 1. ML Core (Python)
+
 ```bash
 cd core_quantizer
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate   # Windows: venv\Scripts\activate
+
 pip install pandas torch torch-geometric scikit-learn numpy
-python -m src.data_loader --generate-sample  # Ingests STRING dataset slice
-python -m src.quantizer                      # Generates optimized INT8 packed model
-python -m src.benchmark                      # Generates performance metrics
+
+python -m src.data_loader --generate-sample
+python -m src.quantizer
+python -m src.benchmark
 ```
 
-### 2. API Gateway (Laravel)
-The gateway acts as the bridge between clinical requests and the edge-native ML core.
+---
 
-**Environment Configuration:**
-Ensure your `.env` file points to the correct Python executable within the `core_quantizer` virtual environment to ensure deterministic execution.
+### 2. API Gateway (Laravel)
+
 ```bash
 cd api_gateway
 composer install
 echo "PYTHON_PATH=$(pwd)/../core_quantizer/venv/Scripts/python.exe" >> .env
+php artisan migrate
 php artisan serve
 ```
 
-**Running the Gateway:**
-1.  **Initialize Database**: `php artisan migrate` (Sets up system tables for logging and audit trails).
-2.  **Start Server**: `php artisan serve` (Default: `http://localhost:8000`).
+---
+
+## Benchmark Configuration
+
+**Hardware:**
+- CPU: Intel Core i5-10210U (4C/8T, 1.60 GHz)
+- RAM: 8 GB (7.88 GB usable)
+- OS: Windows 11 Home Single Language (Build 22600, x64)
+- System: AVITA NS14A8
+
+**Execution Settings:**
+
+* Runs: 100
+* Threads: 1 (controlled variance mode)
+* Input: full graph
 
 ---
 
-## Performance Validation (Benchmarked)
-Testing conducted on research-grade parameters (**4096-dimensional embeddings**) to simulate production clinical intelligence.
+## Performance Results
 
-| Metric | Baseline (FP32) | Optimized (INT8) | Status |
-| :--- | :--- | :--- | :--- |
-| **Model Weights** | 64.03 MB | **16.02 MB** | **74.99% Compression** |
-| **Avg Latency** | 323.36 ms | **313.64 ms** | **Outperforming** |
-| **P95 Latency** | 334.77 ms | **333.91 ms** | **Real-Time Ready** |
-| **System Jitter (SD)** | **±13.90 ms** | **±14.46 ms** | **Deterministic** |
-
----
-
-## Technical Explanations
-*   **Manual Weight Packing**: Unlike standard library-driven quantization, this framework manually quantizes weights into `int8` and stores them as a packed state dictionary, ensuring absolute control over the storage footprint.
-*   **GraphSAGE Architecture**: Utilizes inductive learning to generate embeddings for nodes (proteins) not seen during training, essential for evolving biological networks.
-*   **FHIR Mapping**: Automatically translates raw ML logits into standard-compliant `DiagnosticReport` resources, enabling immediate interoperability with hospital data systems.
-*   **Standard Deviation (SD)**: Used as a core metric for clinical auditing to verify that system "jitter" remains within acceptable safety bounds for real-time monitoring.
+| Metric               | FP32 Baseline | INT8 Packed  | Observation        |
+| -------------------- | ------------- | ------------ | ------------------ |
+| **Model Weights**    | 64.03 MB      | **16.02 MB** | **~75% reduction** |
+| **Avg Latency**      | 323.36 ms     | 313.64 ms    | ~3% improvement    |
+| **P95 Latency**      | 334.77 ms     | 333.91 ms    | negligible change  |
+| **Std Dev (Jitter)** | ±13.90 ms     | ±14.46 ms    | bounded variance   |
 
 ---
 
-## Limitations
-*   **Dynamic Dequantization Overhead**: For small-scale models (<10MB), the CPU cycles required to dequantize INT8 weights back to FP32 during the forward pass can occasionally exceed the memory bandwidth savings, resulting in a "latency plateau."
-*   **Metadata Floor**: Serialization formats like TorchScript introduce a fixed metadata overhead (approx. 4-8MB) that can mask compression gains on low-dimensional architectures.
-*   **Cache Locality Dependence**: Performance gains are most visible when the model size exceeds the L3 cache of the target processor, forcing the system to rely on memory bandwidth efficiency.
-*   **Subprocess Latency**: The Laravel-to-Python bridge introduces a nominal overhead (approx. 10-15ms) per request due to process initialization in the current `proc_open` implementation.
+## Key Insight
+
+Quantization does **not significantly improve latency** in this pipeline because:
+
+* graph aggregation dominates compute
+* high-dimensional feature movement is memory-bound
+* Linear layers are not the primary bottleneck
+
+👉 **Conclusion:**
+Optimization primarily reduces **storage footprint**, not raw compute time.
 
 ---
 
-## Implementation Rationale
-*   **ML Credibility**: Utilizes **PyTorch Geometric** for non-Euclidean biological data processing rather than generic mocks.
-*   **Resource Efficiency**: Implements **Manual INT8 Weight Packing** to reduce model footprint by 75%, enabling deployment on resource-constrained edge hardware.
-*   **Deterministic Intelligence**: Uses absolute path resolution and explicit virtual environment execution to eliminate environmental noise during clinical auditing.
-*   **IP Alignment**: Developed in coordination with modular on-device clinical intelligence research (**Indian Patent No. 202541127477**).
+## Quantization Strategy
+
+This implementation uses **manual INT8 weight packing**:
+
+* Weights converted → `int8`
+* Scale factors stored separately
+* Dequantization occurs during inference
+
+**Trade-offs:**
+
+* ✔ ~70–75% model size reduction
+* ❗ Dequantization overhead
+* ❗ Limited latency gain under current architecture
+
+---
+
+## 🔌 System Integration
+
+Current pipeline:
+
+```
+Laravel → subprocess → Python → GNN → Response
+```
+
+**Measured Overhead:**
+
+* ~10–15 ms per request
+
+**Limitation:**
+
+* Not scalable for high-throughput systems
+
+**Future Direction:**
+
+* Replace subprocess with persistent inference service (FastAPI / gRPC)
+
+---
+
+## Clinical Alignment (Experimental)
+
+The system includes structured output compatible with FHIR-style schemas
+to simulate integration into clinical workflows.
+
+**Note:**
+This is a research prototype and **not validated for medical use**.
+
+---
+
+## ⚠️ Limitations
+
+* No formal accuracy benchmarking yet
+* Quantization does not significantly reduce latency
+* TorchScript size does not reflect compression gains
+* Subprocess-based execution adds overhead
+* No ARM / edge hardware validation yet
+
+---
+
+## Intellectual Property
+
+Indian Patent Application: **202541127477**
+
+---
+
+## Roadmap
+
+* [ ] Accuracy validation (FP32 vs INT8)
+* [ ] ARM / edge hardware benchmarking
+* [ ] Persistent inference service
+* [ ] Sparse GNN optimization
+* [ ] ONNX INT8 deployment pipeline
 
 ---
 
 ## Technical Glossary
-| Term | Description |
-| :--- | :--- |
-| **GraphSAGE** | Inductive learning architecture used for analyzing unseen protein nodes. |
-| **STRING** | The biological interaction dataset utilized for research-grade validation. |
-| **Quantization** | Converting Float32 weights to Int8 to optimize for edge-native execution layers. |
-| **FHIR** | Standard protocol for exchanging electronic health records. |
-| **P95 Latency** | The latency threshold under which 95% of requests fall, indicating system stability. |
+
+| Term         | Description                    |
+| ------------ | ------------------------------ |
+| GraphSAGE    | Inductive GNN for unseen nodes |
+| STRING       | Protein interaction dataset    |
+| Quantization | FP32 → INT8 weight conversion  |
+| P95 Latency  | 95th percentile latency        |
+
+---
